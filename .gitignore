@@ -1,0 +1,33 @@
+# Binarios
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Tests
+*.test
+coverage.out
+coverage.html
+
+# Dependencias
+vendor/
+
+# Entorno local (secretos)
+.env
+.env.local
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
