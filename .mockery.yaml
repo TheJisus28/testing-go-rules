@@ -1,0 +1,21 @@
+with-expecter: true
+outpkg: mocks
+mockname: "Mock{{.InterfaceName}}"
+filename: "mock_{{.InterfaceName | snakecase}}.go"
+packages:
+  github.com/donca/user-crud/internal/users/interfaces:
+    config:
+      all: true
+      dir: internal/users/mocks/interfaces
+  github.com/donca/user-crud/internal/posts/interfaces:
+    config:
+      all: true
+      dir: internal/posts/mocks/interfaces
+  github.com/donca/user-crud/internal/friendships/interfaces:
+    config:
+      all: true
+      dir: internal/friendships/mocks/interfaces
+  github.com/donca/user-crud/internal/auth/interfaces:
+    config:
+      all: true
+      dir: internal/auth/mocks/interfaces

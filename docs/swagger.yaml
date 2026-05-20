@@ -1,0 +1,291 @@
+basePath: /
+definitions:
+  github_com_donca_user-crud_internal_auth_models.AuthResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/github_com_donca_user-crud_internal_users_models.User'
+    type: object
+  github_com_donca_user-crud_internal_auth_models.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  github_com_donca_user-crud_internal_auth_models.RegisterRequest:
+    properties:
+      display_name:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  github_com_donca_user-crud_internal_users_models.ProfileResponse:
+    properties:
+      profile:
+        $ref: '#/definitions/github_com_donca_user-crud_internal_users_models.UserProfile'
+    type: object
+  github_com_donca_user-crud_internal_users_models.UpdateProfileRequest:
+    properties:
+      avatar_url:
+        type: string
+      bio:
+        type: string
+      display_name:
+        type: string
+    type: object
+  github_com_donca_user-crud_internal_users_models.UpdateUserRequest:
+    properties:
+      avatar_url:
+        type: string
+      bio:
+        type: string
+      display_name:
+        type: string
+      email:
+        type: string
+    type: object
+  github_com_donca_user-crud_internal_users_models.User:
+    properties:
+      avatar_url:
+        type: string
+      bio:
+        type: string
+      created_at:
+        type: string
+      display_name:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  github_com_donca_user-crud_internal_users_models.UserProfile:
+    properties:
+      avatar_url:
+        type: string
+      bio:
+        type: string
+      created_at:
+        type: string
+      display_name:
+        type: string
+      id:
+        type: string
+      username:
+        type: string
+    type: object
+  github_com_donca_user-crud_internal_users_models.UserResponse:
+    properties:
+      user:
+        $ref: '#/definitions/github_com_donca_user-crud_internal_users_models.User'
+    type: object
+  github_com_donca_user-crud_internal_users_models.UsersListResponse:
+    properties:
+      users:
+        items:
+          $ref: '#/definitions/github_com_donca_user-crud_internal_users_models.UserProfile'
+        type: array
+    type: object
+  github_com_donca_user-crud_pkg_kit_wrapper.Response-any:
+    properties:
+      data: {}
+      status:
+        type: string
+      status_reason:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: Mini red social con usuarios, posts públicos/privados y solicitudes
+    de amistad
+  title: SocialNet API
+  version: "1.0"
+paths:
+  /v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_donca_user-crud_internal_auth_models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_donca_user-crud_internal_auth_models.AuthResponse'
+      summary: Login
+      tags:
+      - Auth
+  /v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Registration
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_donca_user-crud_internal_auth_models.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_donca_user-crud_internal_auth_models.AuthResponse'
+      summary: Register a new user
+      tags:
+      - Auth
+  /v1/me/profile:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Profile payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_donca_user-crud_internal_users_models.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_donca_user-crud_internal_users_models.UserResponse'
+      security:
+      - BearerAuth: []
+      summary: Update own profile
+      tags:
+      - Users
+  /v1/users:
+    get:
+      parameters:
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_donca_user-crud_internal_users_models.UsersListResponse'
+      summary: List user profiles
+      tags:
+      - Users
+  /v1/users/{id}:
+    delete:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_donca_user-crud_pkg_kit_wrapper.Response-any'
+      security:
+      - BearerAuth: []
+      summary: Delete user account
+      tags:
+      - Users
+    get:
+      description: Returns full user data (authenticated owner only for email)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_donca_user-crud_internal_users_models.UserResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_donca_user-crud_pkg_kit_wrapper.Response-any'
+      summary: Get user by ID
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_donca_user-crud_internal_users_models.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_donca_user-crud_internal_users_models.UserResponse'
+      security:
+      - BearerAuth: []
+      summary: Update user account
+      tags:
+      - Users
+  /v1/users/{id}/profile:
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_donca_user-crud_internal_users_models.ProfileResponse'
+      summary: Get public profile
+      tags:
+      - Users
+securityDefinitions:
+  BearerAuth:
+    description: 'Token JWT. Formato: Bearer &lt;token&gt;'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
