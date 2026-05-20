@@ -15,6 +15,7 @@ type userService struct {
 	repo interfaces.UserRepository
 }
 
+// NewUserService creates the users application service.
 func NewUserService(repo interfaces.UserRepository) interfaces.UserService {
 	return &userService{repo: repo}
 }
@@ -54,6 +55,7 @@ func (s *userService) List(ctx context.Context, limit, offset int) ([]models.Use
 	return users, nil
 }
 
+// Update allows a user to change only their own account fields.
 func (s *userService) Update(ctx context.Context, actorID, targetID string, req models.UpdateUserRequest) (*models.User, error) {
 	if actorID != targetID {
 		return nil, kiterrors.Forbidden("you can only update your own account")

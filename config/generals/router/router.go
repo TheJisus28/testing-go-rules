@@ -1,3 +1,4 @@
+// Package router composes the root Echo instance and feature route groups.
 package router
 
 import (
@@ -19,10 +20,12 @@ import (
 	_ "github.com/donca/user-crud/docs"
 )
 
+// Router owns the Echo server and global middleware.
 type Router struct {
 	echo *echo.Echo
 }
 
+// NewRouter wires health, auth, users, posts, friendships, and Swagger.
 func NewRouter(
 	healthRouter *health.HealthRouter,
 	authRouter *authrouter.AuthRouter,
@@ -47,6 +50,7 @@ func NewRouter(
 	return &Router{echo: e}
 }
 
+// Start listens on addr or APP_PORT when addr is empty.
 func (r *Router) Start(addr string) error {
 	if addr == "" {
 		addr = ":" + os.Getenv(enums.AppPort)

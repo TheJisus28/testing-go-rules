@@ -1,3 +1,4 @@
+// Package logger provides process-wide and request-scoped zerolog helpers.
 package logger
 
 import (
@@ -14,6 +15,7 @@ type ctxKey struct{}
 
 var global zerolog.Logger
 
+// Init configures the global log level and console writer (call once from main).
 func Init(level string) {
 	lvl, err := zerolog.ParseLevel(strings.ToLower(level))
 	if err != nil {
@@ -38,6 +40,7 @@ func WithLogger(ctx context.Context, log zerolog.Logger) context.Context {
 	return context.WithValue(ctx, ctxKey{}, log)
 }
 
+// Middleware attaches a request-scoped logger and emits an access log line per request.
 func Middleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {

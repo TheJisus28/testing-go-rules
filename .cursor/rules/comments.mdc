@@ -1,0 +1,80 @@
+---
+description: Code comments and documentation standards
+globs: "**/*.go"
+alwaysApply: false
+---
+
+# Comments
+
+All comments, godoc comments, Swagger annotations, TODOs, logs, and developer notes MUST be written in English.
+
+Prefer expressive code over excessive comments.
+
+Comments should explain:
+- intent
+- constraints
+- architectural decisions
+- non-obvious behavior
+
+Do NOT comment:
+- obvious code
+- trivial operations
+- self-explanatory logic
+
+Avoid comments like:
+
+// increment counter
+i++
+
+// call service
+svc.Create()
+
+---
+
+# Godoc
+
+Exported symbols should have concise godoc comments when behavior is not immediately obvious.
+
+Godoc must:
+- start with the symbol name
+- describe intent
+- avoid implementation details
+
+Good:
+
+// CreateOrder validates and persists a new order.
+
+Bad:
+
+// CreateOrder calls the repository to insert an order.
+
+---
+
+# TODOs
+
+TODOs must:
+- be actionable
+- provide context
+- describe the future improvement clearly
+
+Good:
+
+// TODO: Replace polling with Kafka consumer after rollout.
+
+Bad:
+
+// TODO fix this
+
+---
+
+# Avoid
+
+- Spanish comments
+- bilingual comments
+- commented-out code
+- debug notes
+- implementation-history comments
+- noisy comments
+- redundant comments
+
+Use logs for runtime observability instead of explanatory comments.

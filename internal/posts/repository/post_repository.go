@@ -67,6 +67,7 @@ func (r *postRepository) Delete(ctx context.Context, id, authorID string) error 
 	return nil
 }
 
+// ListByAuthor returns a user's wall filtered by the same visibility rules as the service layer.
 func (r *postRepository) ListByAuthor(ctx context.Context, authorID, viewerID string, limit, offset int) ([]models.Post, error) {
 	rows, err := r.db.Pool.Query(ctx, `
 		SELECT p.id, p.author_id, u.display_name, p.content, p.visibility, p.created_at, p.updated_at
@@ -95,6 +96,7 @@ func (r *postRepository) ListByAuthor(ctx context.Context, authorID, viewerID st
 	return scanPostRows(rows)
 }
 
+// ListFeed returns public posts, the viewer's own posts, and friends-only private posts.
 func (r *postRepository) ListFeed(ctx context.Context, viewerID string, limit, offset int) ([]models.Post, error) {
 	rows, err := r.db.Pool.Query(ctx, `
 		SELECT p.id, p.author_id, u.display_name, p.content, p.visibility, p.created_at, p.updated_at

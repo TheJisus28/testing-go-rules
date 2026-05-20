@@ -1,3 +1,4 @@
+// Package jwt issues and validates HS256 access tokens for authenticated requests.
 package jwt
 
 import (
@@ -9,11 +10,13 @@ import (
 
 const tokenTTL = 24 * time.Hour
 
+// Claims carries the authenticated user id in the JWT payload.
 type Claims struct {
 	UserID string `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
+// GenerateToken signs a new bearer token for the given user id.
 func GenerateToken(userID, secret string) (string, error) {
 	claims := Claims{
 		UserID: userID,
@@ -26,6 +29,7 @@ func GenerateToken(userID, secret string) (string, error) {
 	return token.SignedString([]byte(secret))
 }
 
+// ParseToken verifies the token and returns the embedded user id.
 func ParseToken(tokenString, secret string) (string, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {

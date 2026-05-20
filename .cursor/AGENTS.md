@@ -21,6 +21,7 @@ Read `rules/go-project-structure.mdc` first for layout and naming.
 | go-mockery | Mockery config and generated mocks |
 | go-service-tests | Service unit tests (>80% coverage gate) |
 | go-api-documentation | Swagger / swag annotations |
+| comments | English godoc; intent over noise |
 | semantic-commits | Conventional commits; confirm before committing |
 
 ## Typical Makefile targets

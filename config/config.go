@@ -1,3 +1,4 @@
+// Package config loads environment variables used at application startup.
 package config
 
 import (
@@ -7,6 +8,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// LoadEnv reads .env when present and applies safe defaults for local development.
 func LoadEnv() {
 	_ = godotenv.Load()
 	setDefault(enums.AppPort, "8080")

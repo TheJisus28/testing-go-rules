@@ -2,10 +2,11 @@ package models
 
 import "time"
 
+// Friendship status values stored in the friendships table.
 const (
 	StatusPending  = "pending"
 	StatusAccepted = "accepted"
-	StatusRejected = "rejected"
+	StatusRejected = "rejected" // blocks a new request until product rules allow resend
 )
 
 type Friendship struct {

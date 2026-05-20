@@ -17,6 +17,7 @@ type postService struct {
 	friendships friendinterfaces.FriendshipRepository
 }
 
+// NewPostService wires post persistence with friendship checks for private visibility.
 func NewPostService(repo interfaces.PostRepository, friendships friendinterfaces.FriendshipRepository) interfaces.PostService {
 	return &postService{repo: repo, friendships: friendships}
 }
@@ -101,6 +102,7 @@ func (s *postService) Feed(ctx context.Context, viewerID string, limit, offset i
 	return posts, nil
 }
 
+// canView mirrors feed filtering: public posts, own posts, or private posts visible to friends.
 func (s *postService) canView(ctx context.Context, post *models.Post, viewerID string) bool {
 	if post.Visibility == models.VisibilityPublic {
 		return true

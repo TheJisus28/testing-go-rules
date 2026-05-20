@@ -1,3 +1,4 @@
+// Package storage provides the PostgreSQL connection pool and schema migrations.
 package storage
 
 import (
@@ -17,10 +18,12 @@ import (
 //go:embed migrations/*.sql
 var migrationsFS embed.FS
 
+// PostgresPool wraps a pgx pool after connectivity checks and migrations.
 type PostgresPool struct {
 	Pool *pgxpool.Pool
 }
 
+// NewPostgresPool connects using DATABASE_URL and runs embedded SQL migrations in filename order.
 func NewPostgresPool() (*PostgresPool, error) {
 	url := os.Getenv(enums.DatabaseURL)
 	pool, err := pgxpool.New(context.Background(), url)
@@ -40,6 +43,7 @@ func NewPostgresPool() (*PostgresPool, error) {
 	return p, nil
 }
 
+// runMigrations applies every .sql file under migrations/; idempotent scripts are required.
 func (p *PostgresPool) runMigrations(ctx context.Context) error {
 	entries, err := migrationsFS.ReadDir("migrations")
 	if err != nil {

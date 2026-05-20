@@ -39,6 +39,7 @@ func (r *friendshipRepository) FindByID(ctx context.Context, id string) (*models
 	return f, err
 }
 
+// FindBetween looks up the single friendship row for an unordered user pair, if any.
 func (r *friendshipRepository) FindBetween(ctx context.Context, userA, userB string) (*models.Friendship, error) {
 	row := r.db.Pool.QueryRow(ctx, `
 		SELECT id, requester_id, addressee_id, status, created_at, updated_at
@@ -113,6 +114,7 @@ func (r *friendshipRepository) ListFriends(ctx context.Context, userID string) (
 	return friends, rows.Err()
 }
 
+// AreFriends reports whether an accepted friendship exists in either direction.
 func (r *friendshipRepository) AreFriends(ctx context.Context, userA, userB string) (bool, error) {
 	var exists bool
 	err := r.db.Pool.QueryRow(ctx, `

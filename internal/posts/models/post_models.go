@@ -2,9 +2,10 @@ package models
 
 import "time"
 
+// Post visibility values enforced in the service layer and database check constraint.
 const (
-	VisibilityPublic  = "public"
-	VisibilityPrivate = "private"
+	VisibilityPublic  = "public"  // visible to any viewer (including anonymous for read endpoints)
+	VisibilityPrivate = "private" // visible to the author and accepted friends only
 )
 
 type Post struct {

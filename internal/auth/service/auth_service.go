@@ -20,6 +20,7 @@ type authService struct {
 	users userinterfaces.UserRepository
 }
 
+// NewAuthService registers and authenticates users via the shared user repository.
 func NewAuthService(users userinterfaces.UserRepository) interfaces.AuthService {
 	return &authService{users: users}
 }

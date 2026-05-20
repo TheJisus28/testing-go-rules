@@ -32,6 +32,7 @@ func (s *friendshipService) SendRequest(ctx context.Context, requesterID string,
 	}
 	existing, _ := s.repo.FindBetween(ctx, requesterID, req.AddresseeID)
 	if existing != nil {
+		// A single row exists per unordered pair; status drives whether a new request is allowed.
 		switch existing.Status {
 		case models.StatusAccepted:
 			return nil, kiterrors.Conflict("already friends")

@@ -1,3 +1,4 @@
+// Package errors defines stable domain error codes for API responses.
 package errors
 
 import "fmt"
@@ -15,6 +16,7 @@ const (
 	StatusReasonOK          = "ok"
 )
 
+// DomainError is a business-level failure with a machine-readable code and client-safe message.
 type DomainError struct {
 	Code    string
 	Message string

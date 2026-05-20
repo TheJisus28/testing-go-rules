@@ -1,3 +1,4 @@
+// Package injector registers the application dependency graph with Uber Dig.
 package injector
 
 import (
@@ -28,10 +29,12 @@ import (
 	"go.uber.org/dig"
 )
 
+// Container is the shared Dig container for the HTTP API process.
 var Container *dig.Container
 
 func init() {
 	Container = dig.New()
+	// Order: infrastructure → repositories → services → handlers → routers.
 	check(Container.Provide(storage.NewPostgresPool))
 	check(Container.Provide(userrepo.NewUserRepository))
 	check(Container.Provide(friendrepo.NewFriendshipRepository))

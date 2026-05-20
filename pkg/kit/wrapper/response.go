@@ -1,3 +1,4 @@
+// Package wrapper maps domain errors to the standard JSON envelope and HTTP status codes.
 package wrapper
 
 import (
@@ -9,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Response is the uniform success and error payload returned by HTTP handlers.
 type Response[T any] struct {
 	Status       string `json:"status"`
 	StatusReason string `json:"status_reason"`
@@ -34,6 +36,7 @@ func codeToHTTPStatus(code string) int {
 	}
 }
 
+// FromError converts a DomainError (or unknown error) into a Response and HTTP status.
 func FromError(err error) (Response[any], int) {
 	var domainErr *kiterrors.DomainError
 	if errors.As(err, &domainErr) {
@@ -50,6 +53,7 @@ func FromError(err error) (Response[any], int) {
 	}, http.StatusInternalServerError
 }
 
+// GenerateResponse writes a success envelope or maps err through FromError.
 func GenerateResponse[T any](c echo.Context, data T, err error) error {
 	if err != nil {
 		resp, status := FromError(err)
