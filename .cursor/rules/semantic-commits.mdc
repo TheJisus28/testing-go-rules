@@ -44,24 +44,22 @@ Why:
 
 7. NEVER use generic messages.
 
-8. Before committing:
-   - show proposed commit plan
+8. Before committing (unless the user explicitly asks to commit immediately):
+   - show a proposed commit plan
    - ask for confirmation
 
-9. When the user provides a target date:
+9. When the user provides a target date range:
    - distribute commits randomly between:
      - 10:00 AM - 12:00 PM
      - 1:00 PM - 5:00 PM
 
-10. Use:
-- GIT_AUTHOR_DATE
-- GIT_COMMITTER_DATE
+10. Set commit dates with `GIT_AUTHOR_DATE` and `GIT_COMMITTER_DATE`.
 
 11. Use actual git commands.
 
 12. Never force push automatically.
 
-13. Commit chronology rules:
+13. Commit chronology:
 
 - Every new commit timestamp MUST be later than the previous commit.
 

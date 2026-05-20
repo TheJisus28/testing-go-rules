@@ -36,7 +36,7 @@ Add `handler` package only if the project already mocks handlers. Match `dir`, `
 ## Usage in tests
 
 ```go
-import mocks "example.com/app/internal/orders/mocks/interfaces"
+import mocks "<module>/internal/<domain>/mocks/interfaces"
 
 repo := mocks.NewMockOrderRepository(t)
 repo.EXPECT().FindByID(mock.Anything, "id-1").Return(&models.Order{}, nil)

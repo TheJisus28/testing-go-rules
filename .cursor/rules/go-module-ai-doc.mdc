@@ -18,9 +18,7 @@ internal/<domain>/AGENTS.md
 
 Submodules (features) are **sections** inside this file, not separate human-oriented READMEs.
 
-Copy [templates/AGENTS.md](../templates/AGENTS.md) when creating a new domain, then replace placeholders.
-
-Claude Code: [claude/rules/module-ai-doc.md](../claude/rules/module-ai-doc.md).
+Use the template below when creating a new domain.
 
 ## Template
 
