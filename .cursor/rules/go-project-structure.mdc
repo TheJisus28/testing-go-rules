@@ -1,0 +1,114 @@
+---
+description: Global Go service layout (cmd, config, internal, pkg, docs) and struct-based design
+globs: "**/*.go,**/go.mod,**/docs/**"
+alwaysApply: false
+---
+
+# Project structure
+
+Bootstrap, new domains, or cross-cutting infrastructure. Domain layers: [go-module-structure.mdc](./go-module-structure.mdc). Wiring: [go-config-wiring.mdc](./go-config-wiring.mdc).
+
+## Layout
+
+```
+<repo>/
+├── cmd/main.go
+├── config/
+│   ├── config.go
+│   ├── generals/
+│   │   ├── injector/
+│   │   ├── logger/
+│   │   └── router/
+│   └── storage/
+├── docs/
+├── internal/<domain>/
+│   ├── handler/
+│   ├── interfaces/
+│   ├── models/
+│   ├── repository/
+│   ├── service/
+│   └── mocks/
+├── pkg/kit/
+├── pkg/middleware/
+├── go.mod
+└── .mockery.yaml
+```
+
+Subfolders under `config/generals/` may differ per project; preserve the project's naming when it already exists.
+
+| Path | Role |
+|------|------|
+| `cmd/` | Startup only: env, logger init, DI invoke, server start |
+| `config/` | Env, logger, Dig, HTTP routers, DB bootstrap |
+| `internal/` | Domain code; not importable externally |
+| `pkg/` | Shared kit; no domain imports |
+| `docs/` | Generated OpenAPI |
+
+## Struct-based components
+
+Every capability is a struct: private type, `New*` constructor, methods. Dependencies are struct fields set in the constructor.
+
+| Layer | Type | Constructor | Returns |
+|-------|------|-------------|---------|
+| Root HTTP | `Router` | `NewRouter(...)` | `*Router` |
+| Feature HTTP | `OrderRouter` | `NewOrderRouter(h)` | `*OrderRouter` |
+| Handler | `orderHandler` | `NewOrderHandler(svc)` | interface |
+| Service | `orderService` | `NewOrderService(repo)` | interface |
+| Repository | `orderRepository` | `NewOrderRepository(db)` | interface |
+
+`cmd/main` orchestrates; it does not implement domain logic.
+
+```go
+func main() {
+    config.LoadEnv()
+    logger.Init(os.Getenv(enums.LogLevel))
+    log := logger.Get()
+    if err := injector.Container.Invoke(func(r *router.Router) {
+        log.Fatal().Err(r.Start(":" + os.Getenv(enums.AppPort))).Msg("server stopped")
+    }); err != nil {
+        log.Fatal().Err(err).Msg("failed to start server")
+    }
+}
+```
+
+## Import paths
+
+Filesystem and import path must align.
+
+| Path | Import |
+|------|--------|
+| `internal/orders/handler/` | `<module>/internal/orders/handler` |
+
+Do not import `<module>/orders/...` when code lives under `internal/orders/`.
+
+## Placement
+
+| Concern | Location |
+|---------|----------|
+| Business logic | `internal/<domain>/service/` |
+| Persistence | `internal/<domain>/repository/` |
+| HTTP handlers | `internal/<domain>/handler/` |
+| Route binding | `config/.../router/<feature>/` |
+| DI registration | `config/.../injector/` |
+| Logger | `config/.../logger/` |
+| Response/errors kit | `pkg/kit/` |
+| DB pool, migrations | `config/storage/` |
+
+## `config/`
+
+Root `Router` owns `*echo.Echo`, global middleware, feature router delegation, Swagger mount. Feature routers hold a handler and expose `Register(e *echo.Echo)`. Injector registers: infrastructure → repositories → services → handlers → feature routers → root router. Details: [go-config-wiring.mdc](./go-config-wiring.mdc).
+
+## New domain
+
+1. `internal/<domain>/` with standard packages and `AGENTS.md` ([go-module-ai-doc.mdc](./go-module-ai-doc.mdc))
+2. Imports via `internal/<domain>/...`
+3. `Provide` in `config/.../injector/`
+4. `config/.../router/<feature>/` + root router wiring
+5. `.mockery.yaml`, service tests (>80% coverage), Swagger if HTTP
+
+## Avoid
+
+- Logic or routes in `cmd/`
+- `dig.Provide` or `e.GET` in `internal/<domain>/`
+- Import paths that omit `internal/`
+- Logger or router setup in domain packages

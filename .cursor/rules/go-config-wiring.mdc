@@ -1,0 +1,135 @@
+---
+description: config/ — logger, Uber Dig, Echo routers, storage bootstrap
+globs: "**/config/**/*.go,**/cmd/**/*.go"
+alwaysApply: false
+---
+
+# Config wiring
+
+Application composition belongs in `config/`, not in `internal/<domain>/`. Use structs with constructors and methods. See [go-project-structure.mdc](./go-project-structure.mdc).
+
+## Tree
+
+```
+config/
+├── config.go
+├── generals/
+│   ├── logger/
+│   ├── injector/di.go
+│   └── router/
+│       ├── router.go
+│       └── <feature>/
+└── storage/
+```
+
+## Environment
+
+`config.LoadEnv()` runs from `main` before logger and DI. Required keys validated at startup. Constants live in `pkg/kit/enums` or project equivalent.
+
+## Logger
+
+Package path: `config/.../logger/`. Do not duplicate under `internal/`.
+
+| API | Usage |
+|-----|--------|
+| `Init(level)` | `main`, after env load |
+| `Get()` | Startup, storage bootstrap |
+| `FromCtx(ctx)` | Handlers, services, repositories |
+| `WithLogger(ctx, log)` | Enriched context for downstream calls |
+| `Middleware()` | Root Echo only |
+
+```go
+e.Use(middleware.Recover())
+e.Use(cors.WithCors())
+e.Use(logger.Middleware())
+```
+
+Layer rules: [go-logging.mdc](./go-logging.mdc).
+
+## Dependency injection
+
+Single `dig.Container` in `config/.../injector/`. Register constructors only.
+
+**Order:** infrastructure → repositories → services → handlers → feature routers → root router.
+
+```go
+func init() {
+    Container = dig.New()
+    checkError(Container.Provide(storage.NewPostgresPool))
+    checkError(Container.Provide(repository.NewOrderRepository))
+    checkError(Container.Provide(service.NewOrderService))
+    checkError(Container.Provide(handler.NewOrderHandler))
+    checkError(Container.Provide(order.NewOrderRouter))
+    checkError(Container.Provide(router.NewRouter))
+}
+```
+
+- Domain imports: `<module>/internal/<domain>/handler` (and service, repository).
+- Feature routers receive handlers; root router receives all feature routers.
+- No `Invoke` inside `internal/`.
+
+```go
+injector.Container.Invoke(func(r *router.Router) {
+    log.Fatal().Err(r.Start(addr)).Msg("server stopped")
+})
+```
+
+## Routing
+
+Route binding is configuration. Handlers stay in `internal/`.
+
+**Root router**
+
+```go
+type Router struct { echo *echo.Echo }
+
+func NewRouter(health *health.HealthRouter, order *order.OrderRouter) *Router {
+    e := echo.New()
+    e.Use(middleware.Recover())
+    e.Use(cors.WithCors())
+    e.Use(logger.Middleware())
+    health.Register(e)
+    order.Register(e)
+    e.GET("/swagger/*", echoSwagger.WrapHandler)
+    return &Router{echo: e}
+}
+```
+
+**Feature router**
+
+```go
+type OrderRouter struct { handler handler.OrderHandler }
+
+func NewOrderRouter(h handler.OrderHandler) *OrderRouter {
+    return &OrderRouter{handler: h}
+}
+
+func (r *OrderRouter) Register(e *echo.Echo) {
+    g := e.Group("/v1/orders")
+    g.GET("/:id", r.handler.GetByID)
+}
+```
+
+Blank-import docs in root router: `_ "<module>/docs"`.
+
+## Storage
+
+`NewPostgresPool()` (or equivalent) provided to Dig. Migrations under `config/storage/migrations/`. Repositories receive the pool via constructor; they do not open connections.
+
+## Graph
+
+```
+main → LoadEnv → logger.Init → Invoke(Router)
+  Router → FeatureRouter → Handler → Service → Repository → Pool
+```
+
+## Out of scope for `config/`
+
+Domain SQL, feature DTOs, service unit tests.
+
+## Avoid
+
+- Routes or `Provide` in `internal/<domain>/`
+- Imports missing the `internal/` segment
+- Logger middleware on a feature router instead of root
+- Handlers constructing their own services

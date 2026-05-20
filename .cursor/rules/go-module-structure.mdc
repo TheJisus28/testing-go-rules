@@ -1,0 +1,118 @@
+---
+description: internal/<domain>/ — handler, service, repository layers with structs and interfaces
+globs: "**/internal/**/*.go,**/handler/**/*.go,**/service/**/*.go,**/repository/**/*.go,**/interfaces/**/*.go,**/models/**/*.go"
+alwaysApply: false
+---
+
+# Domain modules
+
+Code under `internal/<domain>/`. Wiring in [go-config-wiring.mdc](./go-config-wiring.mdc). Layout in [go-project-structure.mdc](./go-project-structure.mdc).
+
+## Terms
+
+| Term | Meaning |
+|------|---------|
+| Domain | `internal/<domain>/` bounded context |
+| Feature | Vertical slice; shares `models/`, `interfaces/` |
+| Layer | `handler` → `service` → `repository` |
+
+## Layout
+
+```
+internal/<domain>/
+├── AGENTS.md
+├── handler/<feature>_handler.go
+├── interfaces/<feature>_interfaces.go
+├── models/<feature>_models.go
+├── repository/<feature>_repository.go
+├── service/<feature>_service.go
+├── service/<feature>_service_test.go
+└── mocks/{interfaces,handler}/
+```
+
+Import: `<module>/internal/<domain>/handler`.
+
+`AGENTS.md` documents the domain for agents; update on every change. See [go-module-ai-doc.mdc](./go-module-ai-doc.mdc). Service coverage **>80%**: [go-service-tests.mdc](./go-service-tests.mdc).
+
+## Structs
+
+Private implementation struct, exported `New*` returning an interface when the project uses interfaces.
+
+```go
+type orderService struct { repo interfaces.OrderRepository }
+
+func NewOrderService(repo interfaces.OrderRepository) interfaces.OrderService {
+    return &orderService{repo: repo}
+}
+
+func (s *orderService) GetByID(ctx context.Context, id string) (*models.Order, error) {
+    return s.repo.FindByID(ctx, id)
+}
+```
+
+Routes and Dig registration belong in `config/`, not here.
+
+## Layers
+
+**interfaces/** — `Repository`, `Service`, and shared helpers (parser, validator). `context.Context` first on I/O. No HTTP imports. Handler interface either here or in `handler/`; one style per domain.
+
+**models/** — DTOs, params, responses. Tags per project. No logic.
+
+**repository/** — Persistence only. `New<Feature>Repository(...) <Feature>Repository`. Wrapped errors. No business rules.
+
+**service/** — Business logic. Depends on interfaces only. `New<Feature>Service(...) interfaces.<Feature>Service`.
+
+**handler/** — HTTP binding, validation, status codes. Calls service with `c.Request().Context()`. Map errors via `pkg/kit/wrapper` ([go-errors.mdc](./go-errors.mdc)). No SQL, no repository access. Shared parsers stay in `handler`.
+
+## New feature
+
+| File | Content |
+|------|---------|
+| `interfaces/<feature>_interfaces.go` | Repository, Service |
+| `models/<feature>_models.go` | Types |
+| `repository/`, `service/`, `handler/` | Implementations |
+| `config/.../router/<feature>/` | `*<Feature>Router` |
+| `config/.../injector/` | Provide chain |
+
+One feature → one feature router in `config/`.
+
+## Naming
+
+| Item | Pattern |
+|------|---------|
+| Packages | `handler`, `service`, `repository`, `interfaces`, `models` |
+| Files | `<feature>_<layer>.go` |
+| Types | `OrderService`, `orderService` |
+| Constructors | `NewOrderService` |
+
+## Interfaces
+
+```go
+type OrderRepository interface {
+    FindByID(ctx context.Context, id string) (*models.Order, error)
+}
+
+type OrderService interface {
+    FindByID(ctx context.Context, id string) (*models.Order, error)
+}
+```
+
+Service may match Repository while delegating; diverge when rules accumulate.
+
+## Workflow
+
+1. Mirror an existing feature in the same repository
+2. `models` → `interfaces` → `repository` → `service` → `handler`
+3. mockery → service tests (coverage >80%)
+4. Swagger on handlers; `swag init` if applicable
+5. Register in injector; wire router
+6. Update `AGENTS.md`
+7. `go build ./...` and `go test ./internal/<domain>/...`
+
+## Avoid
+
+- Concrete cross-layer types instead of interfaces
+- Logic, SQL, routes, or `Provide` in domain packages
+- Import paths without `internal/`
+- Package-level stateful functions
+- Logger or HTTP setup in `internal/`

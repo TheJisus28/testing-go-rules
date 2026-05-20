@@ -1,0 +1,85 @@
+---
+description: Logger in config/ — FromCtx, WithLogger, middleware, levels by layer
+globs: "**/handler/**/*.go,**/service/**/*.go,**/repository/**/*.go,**/config/**/logger/**/*.go,**/cmd/**/*.go"
+alwaysApply: false
+---
+
+# Logging
+
+Logger package under `config/.../logger/`. Registration in [go-config-wiring.mdc](./go-config-wiring.mdc).
+
+## API
+
+| Function | Usage |
+|----------|--------|
+| `Init(level)` | `main` |
+| `Get()` | Startup, `config/storage` |
+| `FromCtx(ctx)` | Request-scoped code |
+| `WithLogger(ctx, log)` | Propagate enriched logger |
+| `Middleware()` | Root Echo |
+
+Prefer `FromCtx` / `Get` over Dig-injected loggers unless the project already injects them.
+
+## Flow
+
+`Init` → `Middleware` on root router → handler `FromCtx` → optional `WithLogger` → service/repository `FromCtx` → middleware access log.
+
+Middleware handles HTTP access. Handlers and services handle domain events.
+
+## Handlers
+
+```go
+log := logger.FromCtx(c.Request().Context())
+```
+
+| Level | Case |
+|-------|------|
+| Warn | Validation, client input |
+| Error | Service failure; log detail, domain/generic API response ([go-errors.mdc](./go-errors.mdc)) |
+| Debug | Notable success; sparingly on hot reads |
+
+```go
+log = log.With().Str("tenant_id", req.TenantID).Logger()
+ctx = logger.WithLogger(ctx, log)
+if err := h.service.Create(ctx, req); err != nil {
+    log.Error().Err(err).Msg("orders: create failed")
+}
+```
+
+## Services
+
+```go
+log := logger.FromCtx(ctx)
+if err := s.repo.Insert(ctx, req); err != nil {
+    log.Error().Err(err).Msg("orders: insert failed")
+    return errors.Internal("failed to create resource")
+}
+```
+
+Log a given error once, usually in the service.
+
+## Repositories
+
+Return wrapped errors. Log only repository-specific non-errors (conflict, persisted, skipped row).
+
+## Levels
+
+| Level | Use |
+|-------|-----|
+| Debug | Trace, completion |
+| Info | Expected branch (duplicate, job done) |
+| Warn | Client or degraded path |
+| Error | Failure with `.Err(err)` |
+| Fatal | Startup only |
+
+## Messages
+
+Format: `"<area>: <action> <outcome>"`. Structured fields via `.Str()`, `.Int()`, `.Err()`. Do not log secrets or full sensitive payloads.
+
+## Avoid
+
+- `fmt.Println`, std `log` in application code
+- Logger under `internal/<domain>/`
+- `Fatal` in handlers
+- Same error logged in repository, service, and handler
+- `context.Background()` when request context exists

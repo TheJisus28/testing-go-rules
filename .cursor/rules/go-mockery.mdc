@@ -1,0 +1,59 @@
+---
+description: Mockery config and generated mocks for interfaces
+globs: "**/.mockery.yaml,**/.mockery.yml,**/mocks/**/*.go,**/interfaces/**/*.go"
+alwaysApply: false
+---
+
+# Mockery
+
+Mocks are generated only. Never hand-write mock types.
+
+## Config
+
+Locate `.mockery.yaml` (or `.yml`) at repo root. Extend it; do not replace project conventions.
+
+```yaml
+with-expecter: true
+dir: "internal/<domain>/mocks/{{trimPrefix .InterfaceDirRelative \"internal/<domain>/\"}}"
+outpkg: "mocks"
+mockname: "Mock{{.InterfaceName}}"
+filename: "mock_{{.InterfaceName | snakecase}}.go"
+packages:
+  <module>/internal/<domain>/interfaces:
+    config:
+      all: true
+```
+
+Add `handler` package only if the project already mocks handlers. Match `dir`, `outpkg`, and `mockname` from an existing domain.
+
+## Workflow
+
+1. Define interfaces in `internal/<domain>/interfaces/`
+2. Add packages to `.mockery.yaml`
+3. Run `mockery` (or project `make mocks`)
+4. Commit generated files under `mocks/`
+
+## Usage in tests
+
+```go
+import mocks "example.com/app/internal/orders/mocks/interfaces"
+
+repo := mocks.NewMockOrderRepository(t)
+repo.EXPECT().FindByID(mock.Anything, "id-1").Return(&models.Order{}, nil)
+svc := NewOrderService(repo)
+```
+
+Use `mock.Anything` for `context.Context` when the test does not assert on it. Prefer expecter API (`EXPECT()`) over legacy `On()`.
+
+## Rules
+
+- Mock **interfaces** only, not concrete structs
+- Regenerate after interface changes
+- Test import path must match generated mock location
+- Do not edit generated files except by re-running mockery
+
+## Avoid
+
+- Duplicate mock packages per feature
+- Mocks in `pkg/` or `config/`
+- Checking in stale mocks after signature changes

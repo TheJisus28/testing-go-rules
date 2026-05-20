@@ -1,0 +1,87 @@
+---
+description: AGENTS.md per domain for AI context; update on every module change
+globs: "**/internal/**/AGENTS.md,**/internal/**/*.go"
+alwaysApply: false
+---
+
+# Module AI documentation
+
+Each domain under `internal/<domain>/` maintains **`AGENTS.md`** at the domain root. Purpose: machine-oriented context for agents, not end-user docs.
+
+Update **`AGENTS.md` on every change** to that domain (features, routes, interfaces, tests, dependencies). Stale docs are a defect.
+
+## Location
+
+```
+internal/<domain>/AGENTS.md
+```
+
+Submodules (features) are **sections** inside this file, not separate human-oriented READMEs.
+
+Copy [templates/AGENTS.md](../templates/AGENTS.md) when creating a new domain, then replace placeholders.
+
+Claude Code: [claude/rules/module-ai-doc.md](../claude/rules/module-ai-doc.md).
+
+## Template
+
+```markdown
+# <domain>
+
+## Purpose
+One paragraph: bounded context and responsibilities.
+
+## Layout
+- handler/ — HTTP adapters
+- service/ — business rules
+- repository/ — persistence
+- interfaces/ — contracts
+- models/ — DTOs
+
+## Features
+
+### <feature>
+- **Role:**
+- **Service:** OrderService — Create, GetByID
+- **Repository:** OrderRepository — Insert, FindByID
+- **Routes:** GET /v1/orders/{id}, POST /v1/orders
+- **Dependencies:** Postgres pool, optional cache
+- **Notes:** idempotency, validation rules
+
+## Coverage
+- service/: 84% (target >80%, last run: YYYY-MM-DD)
+
+## Wiring
+- DI: registered in config/.../injector/
+- Router: config/.../router/<feature>/
+
+## Changelog
+- YYYY-MM-DD: added <feature> Create endpoint
+```
+
+Keep sections short. Prefer lists and stable identifiers agents can grep.
+
+## Agent obligations
+
+When modifying `internal/<domain>/`:
+
+1. Edit `AGENTS.md` in the same change set
+2. Refresh feature list, routes, interfaces, and **Coverage** after test run
+3. Append a dated line under **Changelog**
+4. If coverage `<80%`, add tests before finishing ([go-service-tests.mdc](./go-service-tests.mdc))
+
+## Coverage field
+
+Run:
+
+```bash
+go test -cover ./internal/<domain>/service/...
+```
+
+Record result in `AGENTS.md`. Must stay **>80%**. If below threshold, state `BLOCKED: <n>%` until fixed.
+
+## Avoid
+
+- Marketing prose or tutorials
+- Duplicating full Swagger (point to `docs/` and handler godoc)
+- Omitting changelog on behavioral changes
+- `README.md` as substitute when the project standard is `AGENTS.md` — follow repo if it already uses another name (`MODULE.md`, `CLAUDE.md`)

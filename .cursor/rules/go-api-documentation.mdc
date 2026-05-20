@@ -1,0 +1,63 @@
+---
+description: Swagger godoc annotations on handlers and docs/ generation
+globs: "**/handler/**/*.go,**/docs/**,**/cmd/main.go"
+alwaysApply: false
+---
+
+# API documentation
+
+OpenAPI via swag godoc comments on handler methods. Generated output in `docs/`. Root router blank-imports `_ "<module>/docs"`.
+
+## Required per endpoint
+
+```go
+// GetByID godoc
+// @Summary      Get order by ID
+// @Description  Returns a single order
+// @Tags         Orders
+// @Produce      json
+// @Param        id   path      string  true  "Order ID"
+// @Success      200  {object}  models.OrderResponse
+// @Failure      400  {object}  models.ErrorResponse
+// @Failure      404  {object}  models.ErrorResponse
+// @Failure      500  {object}  models.ErrorResponse
+// @Router       /v1/orders/{id} [get]
+func (h *orderHandler) GetByID(c echo.Context) error {
+```
+
+| Annotation | Required |
+|------------|----------|
+| `@Summary` | Yes |
+| `@Tags` | Yes — one tag per feature |
+| `@Router` | Yes — path and method must match `config/.../router/` |
+| `@Success` | Yes — use `models.*` types |
+| `@Failure` | Yes for documented error responses |
+| `@Param` | Yes for path, query, body inputs |
+| `@Produce` / `@Accept` | When applicable |
+
+## Main
+
+```go
+// @title       Acme API
+// @version     1.0
+// @description Order management API
+// @BasePath    /
+```
+
+## Workflow
+
+1. Add or change handler comments when routes or models change
+2. Run `swag init` (or project makefile target)
+3. Commit `docs/docs.go`, `swagger.json`, `swagger.yaml` if the repo tracks them
+
+## Rules
+
+- Types in `@Success` / `@Failure` must exist in `models/`
+- Keep `@Router` in sync with feature router paths
+- Update `AGENTS.md` endpoint list when routes change ([go-module-ai-doc.mdc](./go-module-ai-doc.mdc))
+
+## Avoid
+
+- Undocumented exported HTTP handlers
+- Hand-editing generated `docs/docs.go`
+- Mismatched tag names across endpoints of the same feature

@@ -1,0 +1,148 @@
+---
+description: Domain errors and HTTP mapping via pkg/kit/errors and wrapper
+globs: "**/handler/**/*.go,**/service/**/*.go,**/repository/**/*.go,**/pkg/kit/errors/**/*.go,**/pkg/kit/wrapper/**/*.go"
+alwaysApply: false
+---
+
+# Errors
+
+Domain errors live in `pkg/kit/errors/`. HTTP mapping in `pkg/kit/wrapper/`. Use the project's existing types and helpers; do not introduce a parallel error model.
+
+Logging: [go-logging.mdc](./go-logging.mdc). Handler flow: [go-module-structure.mdc](./go-module-structure.mdc).
+
+## Model
+
+```go
+type DomainError struct {
+    Code    string
+    Message string
+}
+
+func (e *DomainError) Error() string {
+    return fmt.Sprintf("%s: %s", e.Code, e.Message)
+}
+```
+
+Stable string codes map to HTTP status in one place (`wrapper` or equivalent).
+
+| Code | HTTP |
+|------|------|
+| `not_found` | 404 |
+| `validation_error` | 400 |
+| `unauthorized` | 401 |
+| `forbidden` | 403 |
+| `conflict`, `already_exists` | 409 |
+| `unprocessable_entity` | 422 |
+| `internal_error` | 500 |
+
+Constructors: `Validation(msg)`, `NotFound(msg)`, `Internal(msg)`, `Conflict(msg)`, `Unprocessable(msg)`, etc. Reuse sentinels when the default message is enough.
+
+## API response
+
+```go
+type Response[T any] struct {
+    Status       string `json:"status"`
+    StatusReason string `json:"status_reason"`
+    Data         T      `json:"data"`
+}
+```
+
+Success: `status` = project success constant (e.g. `"success"`), `status_reason` = `"ok"`, `data` populated.
+
+Error: `status` = domain code, `status_reason` = client-safe message, `data` = `null`.
+
+```go
+func FromError(err error) (Response[any], int) {
+    var domainErr *errors.DomainError
+    if errors.As(err, &domainErr) {
+        return Response[any]{
+            Status:       domainErr.Code,
+            StatusReason: domainErr.Message,
+            Data:         nil,
+        }, codeToHTTPStatus(domainErr.Code)
+    }
+    return Response[any]{
+        Status:       errors.CodeInternal,
+        StatusReason: "an unexpected error occurred",
+        Data:         nil,
+    }, http.StatusInternalServerError
+}
+```
+
+Unknown errors always become generic 500; never expose driver messages or stack traces to the client.
+
+## By layer
+
+**Repository** — Return `fmt.Errorf("context: %w", err)`. No `DomainError`. No HTTP types.
+
+**Service** — Translate infrastructure failures to `errors.Internal("safe message")`. Return `errors.Validation`, `NotFound`, etc. for business outcomes. Preserve cause in logs, not in the API message.
+
+```go
+if err := s.repo.Insert(ctx, entity); err != nil {
+    log.Error().Err(err).Msg("orders: insert failed")
+    return errors.Internal("failed to create order")
+}
+```
+
+**Handler** — Input validation returns `errors.Validation` from parsers. Map errors through `wrapper.FromError`. Log the real error; return a generic message for unexpected failures when the service does not already return a domain error.
+
+```go
+params, err := parseQuery(c)
+if err != nil {
+    resp, status := wrapper.FromError(err)
+    return c.JSON(status, resp)
+}
+
+data, err := h.service.GetByID(c.Request().Context(), params.ID)
+if err != nil {
+    log := logger.FromCtx(c.Request().Context())
+    log.Error().Err(err).Str("order_id", params.ID).Msg("orders: get failed")
+    resp, status := wrapper.FromError(errors.Internal("failed to get order"))
+    return c.JSON(status, resp)
+}
+
+return wrapper.GenerateResponse(c, data, nil)
+```
+
+When the service already returns `*DomainError`, pass it through:
+
+```go
+if err := h.service.Process(ctx, req); err != nil {
+    resp, status := wrapper.FromError(err)
+    return c.JSON(status, resp)
+}
+```
+
+`GenerateResponse(c, data, err)` centralizes success and domain-error responses when the project provides it.
+
+## Wrapping
+
+| Layer | Pattern |
+|-------|---------|
+| Repository | `fmt.Errorf("insert order: %w", err)` |
+| Service | Map to `errors.Internal` / domain helper; log with `%w` chain |
+| Handler | `wrapper.FromError`; never `err.Error()` in JSON |
+
+Do not wrap `DomainError` with `%w` unless tests assert on the chain. Prefer return domain errors as-is from services.
+
+## Tests
+
+Assert domain outcomes with `errors.As`:
+
+```go
+var domainErr *errors.DomainError
+require.ErrorAs(t, err, &domainErr)
+assert.Equal(t, errors.CodeInternal, domainErr.Code)
+assert.Equal(t, "failed to create order", domainErr.Message)
+```
+
+Repository tests may assert wrapped standard errors; service tests assert `DomainError` codes and messages.
+
+## Avoid
+
+- `echo.HTTPError` or ad-hoc `c.JSON(500, err.Error())` in handlers
+- Raw `pgx`, `sql`, or driver errors reaching the client
+- Different JSON error shapes per endpoint
+- `panic` for expected failures
+- Duplicate mapping tables outside `wrapper`
+- Logging and returning the same internal detail to the caller

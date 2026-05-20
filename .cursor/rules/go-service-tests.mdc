@@ -1,0 +1,73 @@
+---
+description: Service unit tests with testify and mockery; >80% coverage per domain
+globs: "**/service/**/*_test.go,**/service/**/*.go"
+alwaysApply: false
+---
+
+# Service tests
+
+Tests live in `service/<feature>_service_test.go`. Mocks: [go-mockery.mdc](./go-mockery.mdc). Errors: [go-errors.mdc](./go-errors.mdc).
+
+## Coverage
+
+Each `internal/<domain>/` must keep **>80%** coverage on `service/` (use `go test -cover ./internal/<domain>/service/...`). Add tests before merging feature work. Update coverage figure in `AGENTS.md` after running tests.
+
+Repository and handler coverage is encouraged; the **80% gate applies to service** unless the project defines otherwise.
+
+## Stack
+
+- `testing`, `testify/assert`, `testify/require`, `testify/mock`
+- mockery-generated mocks from `mocks/interfaces`
+
+## Required cases per public service method
+
+| Case | Assert |
+|------|--------|
+| Success | `assert.NoError`, expected side effects via mock expectations |
+| Repository/dependency error | `require.ErrorAs` → `*errors.DomainError` with expected `Code` and `Message` |
+| Validation / business branch | No error or specific domain code (duplicate skip, not found, etc.) |
+
+## Pattern
+
+```go
+func TestCreate_Success(t *testing.T) {
+    repo := mocks.NewMockOrderRepository(t)
+    repo.EXPECT().Insert(mock.Anything, mock.Anything).Return(nil)
+    svc := NewOrderService(repo)
+
+    err := svc.Create(context.Background(), &models.CreateRequest{ID: "1"})
+    assert.NoError(t, err)
+}
+
+func TestCreate_RepositoryError(t *testing.T) {
+    repo := mocks.NewMockOrderRepository(t)
+    repo.EXPECT().Insert(mock.Anything, mock.Anything).Return(assert.AnError)
+    svc := NewOrderService(repo)
+
+    err := svc.Create(context.Background(), &models.CreateRequest{ID: "1"})
+    var domainErr *errors.DomainError
+    require.ErrorAs(t, err, &domainErr)
+    assert.Equal(t, errors.CodeInternal, domainErr.Code)
+}
+```
+
+## Conventions
+
+- Table-driven tests when ≥3 input variants
+- `t.Helper()` on shared builders
+- One logical behavior per `Test*` function
+- No real DB or HTTP in service tests
+- Test package `service` (same package) unless project uses `service_test`
+
+## When to add tests
+
+- New or changed service method with any branch
+- Bug fix: regression test first
+- Pure delegation with zero branches: minimal test optional; still keep package above 80% overall
+
+## Avoid
+
+- Testing handlers or SQL here
+- Global state between tests
+- Sleep/time-based flakiness
+- Asserting on log output unless project standard requires it

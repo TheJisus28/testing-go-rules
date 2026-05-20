@@ -1,0 +1,92 @@
+---
+description: Professional semantic commit generator
+alwaysApply: false
+---
+
+When the user asks to generate commits:
+
+You must:
+
+1. Analyze:
+   - git diff
+   - git status
+   - changed files
+   - module boundaries
+
+2. Split unrelated changes into separate commits.
+
+3. Prefer grouping by:
+   - domain
+   - feature
+   - refactor
+   - bugfix
+   - docs
+   - infrastructure
+
+4. Use conventional commits:
+
+<type>(<scope>): <summary>
+
+5. Commit body MUST follow:
+
+What:
+- concrete technical change
+- concrete technical change
+
+Why:
+- technical or business motivation
+- maintainability or consistency reason
+
+6. Keep summaries:
+- concise
+- lowercase
+- professional
+
+7. NEVER use generic messages.
+
+8. Before committing:
+   - show proposed commit plan
+   - ask for confirmation
+
+9. When the user provides a target date:
+   - distribute commits randomly between:
+     - 10:00 AM - 12:00 PM
+     - 1:00 PM - 5:00 PM
+
+10. Use:
+- GIT_AUTHOR_DATE
+- GIT_COMMITTER_DATE
+
+11. Use actual git commands.
+
+12. Never force push automatically.
+
+13. Commit chronology rules:
+
+- Every new commit timestamp MUST be later than the previous commit.
+
+- Never create commits with timestamps earlier than:
+  - the previous generated commit
+  - the current latest repository commit
+
+- Respect logical development order:
+  - foundational changes first
+  - dependent changes later
+  - refactors before consumers
+  - infrastructure before feature usage
+
+- If changes depend on previous modifications, their commit timestamps must reflect that dependency progression.
+
+- Prefer realistic time spacing:
+  - 5 to 45 minutes between commits
+  - larger feature commits may justify longer gaps
+
+- Primary preferred ranges:
+  - 10:00 AM - 12:00 PM
+  - 1:00 PM - 5:00 PM
+
+- If required to preserve chronological consistency, commits MAY extend slightly beyond the preferred ranges.
+
+- Never generate unnatural timestamp jumps.
+
+- Never cluster all commits within the same minute unless explicitly requested.
