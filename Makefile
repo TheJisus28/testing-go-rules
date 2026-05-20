@@ -2,36 +2,36 @@
 
 SWAG ?= swag
 
-# Binario local por defecto; alternativa: make mocks MOCKERY="go run github.com/vektra/mockery/v2@v2.53.5"
+# Default: local binary. Alternative: make mocks MOCKERY="go run github.com/vektra/mockery/v2@v2.53.5"
 MOCKERY ?= mockery
 
 export GOTOOLCHAIN ?= auto
 
-help: ## Muestra esta ayuda
+help: ## Show this help
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
 
-deps: ## Descarga dependencias Go
+deps: ## Download Go dependencies
 	go mod tidy
 
-mocks: ## Genera mocks con mockery (lee .mockery.yaml)
+mocks: ## Generate mocks with mockery (reads .mockery.yaml)
 	$(MOCKERY)
 
-swagger: ## Genera OpenAPI en docs/ con swag
+swagger: ## Generate OpenAPI specs under docs/ with swag
 	$(SWAG) init -g cmd/main.go -o docs --parseDependency --parseInternal
 
-generate: mocks swagger ## Genera mocks y documentación Swagger
+generate: mocks swagger ## Generate mocks and Swagger documentation
 
-build: ## Compila el binario
+build: ## Build the binary
 	go build -o bin/socialnet ./cmd
 
-run: build ## Ejecuta el servidor
+run: build ## Run the server
 	./bin/socialnet
 
-test: generate ## Ejecuta todos los tests (genera mocks antes)
+test: generate ## Run all tests (generates mocks first)
 	go test ./...
 
-test-cover: generate ## Cobertura por dominio en service/
+test-cover: generate ## Per-domain coverage for service/
 	@echo "=== users ==="
 	@go test -cover ./internal/users/service/...
 	@echo "=== auth ==="
@@ -41,8 +41,8 @@ test-cover: generate ## Cobertura por dominio en service/
 	@echo "=== friendships ==="
 	@go test -cover ./internal/friendships/service/...
 
-db-up: ## Levanta PostgreSQL con Docker
+db-up: ## Start PostgreSQL with Docker
 	docker compose up -d postgres
 
-db-down: ## Detiene PostgreSQL
+db-down: ## Stop PostgreSQL
 	docker compose down

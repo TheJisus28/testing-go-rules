@@ -1,11 +1,11 @@
 # friendships
 
 ## Purpose
-Solicitudes de amistad (pending/accepted/rejected) y lista de amigos.
+Friend requests (pending/accepted/rejected) and friends list.
 
 ## Layout
 - handler/ — HTTP adapters
-- service/ — validación y resolución de conflictos
+- service/ — validation and conflict resolution
 - repository/ — PostgreSQL
 - interfaces/ — FriendshipRepository, FriendshipService
 - models/ — DTOs
@@ -14,7 +14,7 @@ Solicitudes de amistad (pending/accepted/rejected) y lista de amigos.
 
 ### friend requests
 - **Service:** FriendshipService — SendRequest, Accept, Reject, ListPendingReceived, ListPendingSent, ListFriends
-- **Repository:** FriendshipRepository — CRUD amistades, AreFriends
+- **Repository:** FriendshipRepository — friendship CRUD, AreFriends
 - **Routes:** POST /v1/friendships/requests, GET requests received/sent, POST accept/reject, GET /v1/friendships/friends
 - **Dependencies:** Postgres, UserRepository
 
@@ -26,4 +26,4 @@ Solicitudes de amistad (pending/accepted/rejected) y lista de amigos.
 - Router: config/generals/router/friendships/
 
 ## Changelog
-- 2026-05-21: tests de servicio (conflictos, accept/reject, listados)
+- 2026-05-21: service tests (conflicts, accept/reject, listings)

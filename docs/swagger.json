@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "Mini red social con usuarios, posts públicos/privados y solicitudes de amistad",
+        "description": "Mini social network with users, public/private posts, and friend requests",
         "title": "SocialNet API",
         "contact": {},
         "version": "1.0"
@@ -74,6 +74,176 @@
                 }
             }
         },
+        "/v1/friendships/friends": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Friendships"
+                ],
+                "summary": "List accepted friends",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_donca_user-crud_internal_friendships_models.FriendsListResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/friendships/requests": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Friendships"
+                ],
+                "summary": "Send a friend request",
+                "parameters": [
+                    {
+                        "description": "Friend request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_donca_user-crud_internal_friendships_models.FriendRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_donca_user-crud_internal_friendships_models.FriendshipResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/friendships/requests/received": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Friendships"
+                ],
+                "summary": "List pending received friend requests",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_donca_user-crud_internal_friendships_models.FriendshipsListResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/friendships/requests/sent": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Friendships"
+                ],
+                "summary": "List pending sent friend requests",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_donca_user-crud_internal_friendships_models.FriendshipsListResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/friendships/requests/{id}/accept": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Friendships"
+                ],
+                "summary": "Accept a friend request",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Request ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_donca_user-crud_internal_friendships_models.FriendshipResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/friendships/requests/{id}/reject": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Friendships"
+                ],
+                "summary": "Reject a friend request",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Request ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_donca_user-crud_internal_friendships_models.FriendshipResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/me/profile": {
             "patch": {
                 "security": [
@@ -107,6 +277,200 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/github_com_donca_user-crud_internal_users_models.UserResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/posts": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Create a post",
+                "parameters": [
+                    {
+                        "description": "Post payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_donca_user-crud_internal_posts_models.CreatePostRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_donca_user-crud_internal_posts_models.PostResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_donca_user-crud_pkg_kit_wrapper.Response-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/posts/feed": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Get personalized feed",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_donca_user-crud_internal_posts_models.PostsListResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/posts/{id}": {
+            "get": {
+                "description": "Respects public/private visibility for the viewer",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Get post by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_donca_user-crud_internal_posts_models.PostResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_donca_user-crud_pkg_kit_wrapper.Response-any"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_donca_user-crud_pkg_kit_wrapper.Response-any"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Update a post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_donca_user-crud_internal_posts_models.UpdatePostRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_donca_user-crud_internal_posts_models.PostResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "Delete a post",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Post ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_donca_user-crud_pkg_kit_wrapper.Response-any"
                         }
                     }
                 }
@@ -278,6 +642,46 @@
                     }
                 }
             }
+        },
+        "/v1/users/{userId}/posts": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Posts"
+                ],
+                "summary": "List posts on a user wall",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_donca_user-crud_internal_posts_models.PostsListResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -316,6 +720,151 @@
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_donca_user-crud_internal_friendships_models.FriendProfile": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_donca_user-crud_internal_friendships_models.FriendRequest": {
+            "type": "object",
+            "properties": {
+                "addressee_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_donca_user-crud_internal_friendships_models.FriendsListResponse": {
+            "type": "object",
+            "properties": {
+                "friends": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_donca_user-crud_internal_friendships_models.FriendProfile"
+                    }
+                }
+            }
+        },
+        "github_com_donca_user-crud_internal_friendships_models.Friendship": {
+            "type": "object",
+            "properties": {
+                "addressee_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "requester_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_donca_user-crud_internal_friendships_models.FriendshipResponse": {
+            "type": "object",
+            "properties": {
+                "friendship": {
+                    "$ref": "#/definitions/github_com_donca_user-crud_internal_friendships_models.Friendship"
+                }
+            }
+        },
+        "github_com_donca_user-crud_internal_friendships_models.FriendshipsListResponse": {
+            "type": "object",
+            "properties": {
+                "friendships": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_donca_user-crud_internal_friendships_models.Friendship"
+                    }
+                }
+            }
+        },
+        "github_com_donca_user-crud_internal_posts_models.CreatePostRequest": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "visibility": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_donca_user-crud_internal_posts_models.Post": {
+            "type": "object",
+            "properties": {
+                "author_id": {
+                    "type": "string"
+                },
+                "author_name": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "visibility": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_donca_user-crud_internal_posts_models.PostResponse": {
+            "type": "object",
+            "properties": {
+                "post": {
+                    "$ref": "#/definitions/github_com_donca_user-crud_internal_posts_models.Post"
+                }
+            }
+        },
+        "github_com_donca_user-crud_internal_posts_models.PostsListResponse": {
+            "type": "object",
+            "properties": {
+                "posts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_donca_user-crud_internal_posts_models.Post"
+                    }
+                }
+            }
+        },
+        "github_com_donca_user-crud_internal_posts_models.UpdatePostRequest": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "visibility": {
                     "type": "string"
                 }
             }
@@ -445,7 +994,7 @@
     },
     "securityDefinitions": {
         "BearerAuth": {
-            "description": "Token JWT. Formato: Bearer \u0026lt;token\u0026gt;",
+            "description": "JWT token. Format: Bearer \u0026lt;token\u0026gt;",
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"

@@ -1,12 +1,12 @@
 # posts
 
 ## Purpose
-Posts con visibilidad public (todos) o private (autor y amigos aceptados).
+Posts with `public` (everyone) or `private` (author and accepted friends) visibility.
 
 ## Layout
 - handler/ — HTTP adapters
-- service/ — validación, control de visibilidad vía friendships
-- repository/ — PostgreSQL con filtros por amistad
+- service/ — validation, visibility checks via friendships
+- repository/ — PostgreSQL with friendship filters
 - interfaces/ — PostRepository, PostService
 - models/ — DTOs
 
@@ -14,7 +14,7 @@ Posts con visibilidad public (todos) o private (autor y amigos aceptados).
 
 ### posts / feed
 - **Service:** PostService — Create, GetByID, Update, Delete, ListByUser, Feed
-- **Repository:** PostRepository — CRUD + feed y muro
+- **Repository:** PostRepository — CRUD + feed and user wall
 - **Routes:** POST /v1/posts, GET /v1/posts/:id, PUT/DELETE /v1/posts/:id, GET /v1/posts/feed, GET /v1/users/:userId/posts
 - **Dependencies:** Postgres, FriendshipRepository (AreFriends)
 
@@ -26,4 +26,4 @@ Posts con visibilidad public (todos) o private (autor y amigos aceptados).
 - Router: config/generals/router/posts/
 
 ## Changelog
-- 2026-05-21: tests de servicio (visibilidad, feed, errores de repo)
+- 2026-05-21: service tests (visibility, feed, repository errors)

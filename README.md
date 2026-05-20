@@ -1,13 +1,13 @@
-# SocialNet — mini red social en Go
+# SocialNet — mini social network in Go
 
-API REST con CRUD de usuarios, perfiles, posts públicos/privados y solicitudes de amistad.
+REST API with user CRUD, profiles, public/private posts, and friend requests.
 
-## Requisitos
+## Requirements
 
 - Go 1.22+
 - Docker (PostgreSQL)
 
-## Inicio rápido
+## Quick start
 
 ```bash
 cp .env.example .env
@@ -17,49 +17,49 @@ make generate   # mocks (mockery) + OpenAPI (swag)
 make run
 ```
 
-Documentación interactiva: `http://localhost:8080/swagger/index.html`
+Interactive API docs: `http://localhost:8080/swagger/index.html`
 
-### Comandos útiles
+### Useful commands
 
-| Comando | Descripción |
+| Command | Description |
 |---------|-------------|
-| `make mocks` | Genera mocks desde `.mockery.yaml` (por defecto vía `go run`) |
-| `make mocks MOCKERY=mockery` | Usa el binario `mockery` instalado en PATH |
-| `make swagger` | Genera `docs/` con swag |
-| `make generate` | Ejecuta mocks + swagger |
-| `make test-cover` | Cobertura de tests en `service/` |
+| `make mocks` | Generate mocks from `.mockery.yaml` (default: local binary) |
+| `make mocks MOCKERY=mockery` | Use the `mockery` binary from PATH |
+| `make swagger` | Generate `docs/` with swag |
+| `make generate` | Run mocks + swagger |
+| `make test-cover` | Service-layer test coverage per domain |
 
-La API escucha en `http://localhost:8080`.
+The API listens on `http://localhost:8080`.
 
-## Autenticación
+## Authentication
 
-Registro y login devuelven un JWT. Envíalo en las rutas protegidas:
+Register and login return a JWT. Send it on protected routes:
 
 ```
 Authorization: Bearer <token>
 ```
 
-## Endpoints principales
+## Main endpoints
 
-| Método | Ruta | Descripción |
+| Method | Path | Description |
 |--------|------|-------------|
-| POST | `/v1/auth/register` | Registro |
+| POST | `/v1/auth/register` | Register |
 | POST | `/v1/auth/login` | Login |
-| GET | `/v1/users` | Listar perfiles |
-| GET | `/v1/users/:id/profile` | Perfil público |
-| PATCH | `/v1/me/profile` | Editar mi perfil (auth) |
-| POST | `/v1/posts` | Crear post (auth) |
-| GET | `/v1/posts/feed` | Feed personalizado (auth) |
-| GET | `/v1/users/:userId/posts` | Posts de un usuario |
-| POST | `/v1/friendships/requests` | Enviar solicitud (auth) |
-| POST | `/v1/friendships/requests/:id/accept` | Aceptar (auth) |
-| GET | `/v1/friendships/friends` | Lista de amigos (auth) |
+| GET | `/v1/users` | List profiles |
+| GET | `/v1/users/:id/profile` | Public profile |
+| PATCH | `/v1/me/profile` | Update my profile (auth) |
+| POST | `/v1/posts` | Create post (auth) |
+| GET | `/v1/posts/feed` | Personalized feed (auth) |
+| GET | `/v1/users/:userId/posts` | User wall |
+| POST | `/v1/friendships/requests` | Send friend request (auth) |
+| POST | `/v1/friendships/requests/:id/accept` | Accept request (auth) |
+| GET | `/v1/friendships/friends` | Friends list (auth) |
 
-## Visibilidad de posts
+## Post visibility
 
-- **public**: visible para todos.
-- **private**: solo el autor y sus amigos aceptados.
+- **public**: visible to everyone.
+- **private**: only the author and accepted friends.
 
-## Estructura
+## Structure
 
-Sigue el layout del proyecto: `cmd/`, `config/`, `internal/<domain>/`, `pkg/`.
+Follows the project layout: `cmd/`, `config/`, `internal/<domain>/`, `pkg/`.

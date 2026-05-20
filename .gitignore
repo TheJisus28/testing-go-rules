@@ -1,4 +1,4 @@
-# Binarios
+# Binaries
 bin/
 *.exe
 *.exe~
@@ -11,10 +11,10 @@ bin/
 coverage.out
 coverage.html
 
-# Dependencias
+# Dependencies
 vendor/
 
-# Entorno local (secretos)
+# Local environment (secrets)
 .env
 .env.local
 

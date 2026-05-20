@@ -1,13 +1,13 @@
 # auth
 
 ## Purpose
-Registro e inicio de sesión con JWT. Delega persistencia de usuarios al dominio `users`.
+JWT registration and login. Delegates user persistence to the `users` domain.
 
 ## Layout
 - handler/ — HTTP adapters
-- service/ — validación, bcrypt, generación de token
+- service/ — validation, bcrypt, token generation
 - interfaces/ — AuthService
-- models/ — DTOs de registro/login
+- models/ — register/login DTOs
 
 ## Features
 
@@ -25,4 +25,4 @@ Registro e inicio de sesión con JWT. Delega persistencia de usuarios al dominio
 - Router: config/generals/router/auth/
 
 ## Changelog
-- 2026-05-21: tests de servicio con mocks de UserRepository
+- 2026-05-21: service tests with UserRepository mocks

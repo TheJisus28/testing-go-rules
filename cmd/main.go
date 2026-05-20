@@ -1,11 +1,11 @@
 // @title       SocialNet API
 // @version     1.0
-// @description Mini red social con usuarios, posts públicos/privados y solicitudes de amistad
+// @description Mini social network with users, public/private posts, and friend requests
 // @BasePath    /
 // @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization
-// @description Token JWT. Formato: Bearer &lt;token&gt;
+// @description JWT token. Format: Bearer &lt;token&gt;
 package main
 
 import (

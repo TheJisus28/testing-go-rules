@@ -1,11 +1,11 @@
 # users
 
 ## Purpose
-CRUD de cuentas y perfiles públicos de usuario.
+User account CRUD and public profiles.
 
 ## Layout
 - handler/ — HTTP adapters
-- service/ — reglas de negocio y autorización (solo propio usuario)
+- service/ — business rules and authorization (own account only)
 - repository/ — PostgreSQL
 - interfaces/ — UserRepository, UserService
 - models/ — DTOs
@@ -14,7 +14,7 @@ CRUD de cuentas y perfiles públicos de usuario.
 
 ### users / profile
 - **Service:** UserService — GetByID, GetProfile, List, Update, UpdateProfile, Delete
-- **Repository:** UserRepository — CRUD + listado de perfiles
+- **Repository:** UserRepository — CRUD + profile listing
 - **Routes:** GET /v1/users, GET /v1/users/:id, GET /v1/users/:id/profile, PUT /v1/users/:id, DELETE /v1/users/:id, PATCH /v1/me/profile
 - **Dependencies:** Postgres pool
 
@@ -26,4 +26,4 @@ CRUD de cuentas y perfiles públicos de usuario.
 - Router: config/generals/router/users/
 
 ## Changelog
-- 2026-05-21: tests de servicio ampliados (UpdateProfile, errores de repo)
+- 2026-05-21: expanded service tests (UpdateProfile, repository errors)
