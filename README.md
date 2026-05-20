@@ -2,6 +2,14 @@
 
 REST API with user CRUD, profiles, public/private posts, and friend requests.
 
+## Origin
+
+This repository started from a single prompt:
+
+> En este repositorio créame una mini red social con un CRUD de usuarios, y posts públicos y privados, perfiles de usuario, solicitudes de amistad, etc. Inicia el proyecto de Go y procede.
+
+The codebase was generated and structured according to the Cursor rules under [`.cursor/rules/`](.cursor/rules/) — including project layout, domain modules, error handling, logging, DI wiring, Swagger, mockery, service tests (>80% coverage), and per-module `AGENTS.md` files.
+
 ## Requirements
 
 - Go 1.22+
