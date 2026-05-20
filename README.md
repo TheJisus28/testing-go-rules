@@ -6,7 +6,7 @@ REST API with user CRUD, profiles, public/private posts, and friend requests.
 
 This repository started from a single prompt:
 
-> En este repositorio créame una mini red social con un CRUD de usuarios, y posts públicos y privados, perfiles de usuario, solicitudes de amistad, etc. Inicia el proyecto de Go y procede.
+> In this repository, build a mini social network with user CRUD, public and private posts, user profiles, friend requests, and related features. Bootstrap the Go project and proceed.
 
 The codebase was generated and structured according to the Cursor rules under [`.cursor/rules/`](.cursor/rules/) — including project layout, domain modules, error handling, logging, DI wiring, Swagger, mockery, service tests (>80% coverage), and per-module `AGENTS.md` files.
 
